@@ -1,5 +1,7 @@
 import java.util.Date;
 import java.util.Vector;
+import java.sql.* ;  // for standard JDBC programs
+import java.util.*;
 
 import javax.swing.JOptionPane;
 
@@ -8,9 +10,45 @@ public class DatabaseAccess {
 	
 	public static Airport[] GetAirportCities()
 	{
+		try{
+			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+			//Set login info here
+			String url = "jdbc:sqlserver://is-fleming.ischool.uw.edu";
+			String user = "perry";
+			String pass = "Info340C";
+
+			//Set the SQL query here
+			String query = "SELECT airport.city FROM airport";
+
+			Connection conn = DriverManager.getConnection(url, user, pass);
+
+			//Set database here
+			conn.setCatalog("AirlineReservation");
+
+			//Call query and store in memory as rs
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			//While results has next, print name
+			ArrayList<String> al = new ArrayList<String>();
+			while(rs.next()){
+				al.add(rs.getString("city"));
+			}
+
+			Airport[] a = new Airport[al.size()];
+			for (int i = 0; i < al.size(); i++) {
+				a[i] = new Airport(i, al.get(i));
+			}
+			return a;
+
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 		// TODO:  Query the database and retrive the information.
 		// resultset.findcolumn(string col)
-		return new Airport[] { new Airport(1,"Seattle"), new Airport(2,"Portland") };
+		//return new Airport[] { new Airport(1,"Seattle"), new Airport(2,"Portland") };
 	}
 	
 	public static Flight[] GetFlights(Airport DepartAirport, Airport ArriveAirport, Date DepartureDate )

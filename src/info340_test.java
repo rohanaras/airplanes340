@@ -18,12 +18,12 @@ public class info340_test {
             String pass = "Info340C";
 
             //Set the SQL query here
-            String query = "SELECT drinker.name FROM drinker";
+            String query = "SELECT airport.city FROM airport";
 
             Connection conn = DriverManager.getConnection(url, user, pass);
 
             //Set database here
-            conn.setCatalog("HW3Bars");
+            conn.setCatalog("AirlineReservation");
 
             //Call query and store in memory as rs
             Statement stmt = conn.createStatement();
@@ -31,7 +31,7 @@ public class info340_test {
 
             //While results has next, print name
             while(rs.next()){
-                System.out.print(rs.getString("name"));
+                System.out.print(rs.getString("city"));
                 System.out.println();
             }
 
