@@ -1,149 +1,138 @@
 import java.util.Date;
+import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
 
 public class DatabaseAccess {
 	
-	public static Order [] GetPendingOrders()
+	public static Airport[] GetAirportCities()
 	{
-		// TODO:  Query the database and retrieve the information.
+		// TODO:  Query the database and retrive the information.
 		// resultset.findcolumn(string col)
-		
-		// DUMMY DATA!
-		Order o = new Order();
-		o.OrderID = 1;
-		o.Customer = new Customer();
-		o.Customer.CustomerID = 1;
-		o.Customer.Name = "Kevin";
-		o.Customer.Email = "kevin@pathology.washington.edu";
-		o.OrderDate = new Date();
-		o.Status = "ORDERED";
-		o.TotalCost = 520.20;
-		o.BillingAddress = "1959 NE Pacific St, Seattle, WA 98195";
-		o.BillingInfo	 = "PO 12345";
-		o.ShippingAddress= "1959 NE Pacific St, Seattle, WA 98195";
-		return new Order [] { o };
+		return new Airport[] { new Airport(1,"Seattle"), new Airport(2,"Portland") };
 	}
 	
-	public static Product[] GetProducts()
+	public static Flight[] GetFlights(Airport DepartAirport, Airport ArriveAirport, Date DepartureDate )
 	{
-		// TODO:  Retrieve all the information about the products.
+		Vector<Flight> vFlights = new Vector<Flight>();
 		
-		// DUMMY VALUES
-		Product p = new Product();
-		p.Description = "A great monitor";
-		p.Name = "Monitor, 19 in";
-		p.InStock = 10;
-		p.Price = 196;
-		p.ProductID = 1;
-		return new Product [] { p } ;
+		
+		// TODO:  Query the database and retrieve the information.
+		// Loop through the row results, creating a new flight for each row.
+		//  Add those flights to the vFlights vector.
+
+		// DUMMY DATA FOLLOWS
+		Flight f = new Flight();
+		f.FlightID = 1;	// ID from the DB..
+		f.ArrivalAirport = new Airport(1,"Seattle");
+		f.DepartureAirport = new Airport(1,"Portland");
+		f.ArrivalTime = new Date();
+		f.DepartureTime = new Date();
+		f.BasePrice = 150;
+		f.Capacity = 10;
+		f.CurrentPrice = 300;
+		f.FlightNumber = "642";
+		f.Reservations = null;	// Don't need to load these now.
+	
+		vFlights.add(f);
+
+		Flight [] arrFlights = new Flight[vFlights.size()];
+		vFlights.toArray(arrFlights);
+		return arrFlights;
 	}
 
-	public static Order GetOrderDetails(int OrderID)
+	public static Flight GetFlightDetails(int FlightID)
 	{
 		// TODO:  Query the database to get the flight information as well as all 
 		// the reservations.
 		
 		// DUMMY DATA FOLLOWS
-		Order o = new Order();
-		o.OrderID = 1;
-		o.Customer = new Customer();
-		o.Customer.CustomerID = 1;
-		o.Customer.Name = "Kevin";
-		o.Customer.Email = "kevin@pathology.washington.edu";
-		o.OrderDate = new Date();
-		o.Status = "ORDERED";
-		o.TotalCost = 520.20;
-		o.BillingAddress = "1959 NE Pacific St, Seattle, WA 98195";
-		o.BillingInfo	 = "PO 12345";
-		o.ShippingAddress= "1959 NE Pacific St, Seattle, WA 98195";
-
-		LineItem li = new LineItem();
-		li.Order = o;
-		li.PricePaid = 540.00;
-		li.Product = new Product();
-		li.Product.Description = "A great product.";
-		li.Product.Name = "Computer Mouse";
-		li.Quantity = 2;
+		Flight f = new Flight();
+		f.FlightID = 1;	// ID from the DB..
+		f.ArrivalAirport = new Airport(1,"Seattle");
+		f.DepartureAirport = new Airport(1,"Portland");
+		f.ArrivalTime = new Date();
+		f.DepartureTime = new Date();
+		f.BasePrice = 150;
+		f.Capacity = 10;
+		f.CurrentPrice = 300;
+		f.FlightNumber = "642";
 		
-		o.LineItems = new LineItem[] {li};
-		return o;
-	}
-
-	public static Product GetProductDetails (int ProductID)
-	{
-		Product p = new Product();
-		p.Description = "A great monitor";
-		p.Name = "Monitor, 19 in";
-		p.InStock = 10;
-		p.Price = 196;
-		p.ProductID = ProductID;
-		p.UserComments = new String [] { "I bought this product last year and it's still the best monitor I've had.", "After 6 months the color started going out, not sure if it was just mine or all of them" };
+		Reservation r = new Reservation();
+		r.Flight = f;
+		r.MealOptions = "Steak";
+		r.Seat = "14B";
+		r.Passenger = new Passenger();
+		r.Passenger.Name = "Kevin";
+		r.NotesAboutReservation = "Has a baby.";
+		r.PricePaid = 154;
+		f.Reservations = new Reservation [] { r };
 		
-		return p;
-		
+		return f;	
 	}
 	
-	public static Customer [] GetCustomers ()
+	public static Passenger [] GetCustomers ()
 	{
 		// TODO:  Query the database to retrieve a list of customers.
 		
 		// DUMMY VALUES FOLLOW
-		Customer c1 = new Customer();
-		c1.CustomerID = 1;
-		c1.Email = "k@u";
-		c1.Name = "Kevin Fleming";
+		Passenger a = new Passenger();
+		a.Name = "Kevin";
+		Passenger b = new Passenger();
+		b.Name = "Niki";
+		Passenger c = new Passenger();
+		c.Name = "Ava";
 		
-		Customer c2 = new Customer();
-		c2.CustomerID = 2;
-		c2.Email = "k@u";
-		c2.Name = "Niki Cassaro";
-
-		Customer c3 = new Customer();
-		c3.CustomerID = 3;
-		c3.Email = "k@u";
-		c3.Name = "Ava Fleming";
-		
-		return new Customer [] { c1, c2, c3 };
+		return new Passenger [] {a,b,c};
 	}
 	
-	public static Order [] GetCustomerOrders (Customer c)
+	public static Reservation [] GetCustomerRervations (Passenger p)
 	{
-		Order o = new Order();
-		o.OrderID = 1;
-		o.Customer = new Customer();
-		o.Customer.CustomerID = 1;
-		o.Customer.Name = "Kevin";
-		o.Customer.Email = "kevin@pathology.washington.edu";
-		o.OrderDate = new Date();
-		o.Status = "ORDERED";
-		o.TotalCost = 520.20;
-		o.BillingAddress = "1959 NE Pacific St, Seattle, WA 98195";
-		o.BillingInfo	 = "PO 12345";
-		o.ShippingAddress= "1959 NE Pacific St, Seattle, WA 98195";
-
-		return new Order [] { o };
+		Reservation r = new Reservation();
+		r.Flight = new Flight();
+		r.Flight.ArrivalAirport = new Airport(0, "Seattle");
+		r.Flight.DepartureAirport = new Airport(0, "Las Vegas");
+		r.Flight.ArrivalTime = new Date();
+		r.Flight.DepartureTime = new Date();
+		r.Flight.BasePrice = 150;
+		r.Flight.CurrentPrice = 300;
+		r.Flight.FlightNumber = "154";
+		r.MealOptions = "Steak";
+		r.Seat = "14B";
+		r.Passenger = new Passenger();
+		r.Passenger.Name = "Kevin";
+		r.NotesAboutReservation = "Has a baby.";
+		r.PricePaid = 180;
+		return new Reservation [] { r };
 	}
 	
-	public static Product [] SearchProductReviews(String query)
+	public static Reservation [] SearchReservationNotes(String query)
 	{
-		// DUMMY VALUES
-		Product p = new Product();
-		p.Description = "A great monitor";
-		p.Name = "Monitor, 19 in";
-		p.InStock = 10;
-		p.Price = 196;
-		p.ProductID = 1;
-		p.Relavance = 0.7;
-		return new Product [] { p} ;
+		Reservation r = new Reservation();
+		r.Flight = new Flight();
+		r.Flight.ArrivalAirport = new Airport(0, "Seattle");
+		r.Flight.DepartureAirport = new Airport(0, "Las Vegas");
+		r.Flight.ArrivalTime = new Date();
+		r.Flight.DepartureTime = new Date();
+		r.Flight.BasePrice = 150;
+		r.Flight.CurrentPrice = 300;
+		r.Flight.FlightNumber = "154";
+		r.MealOptions = "Steak";
+		r.Seat = "14B";
+		r.Passenger = new Passenger();
+		r.Passenger.Name = "Kevin";
+		r.NotesAboutReservation = "Has a baby.";
+		r.PricePaid = 180;
+		r.Relavance = 0.7;
+		return new Reservation [] { r };
 	}
 	                    
-	public static void MakeOrder(Customer c, LineItem [] LineItems)
+	public static void MakeReservation(Flight f, Passenger p, String Seat, String Meal, String Notes)
 	{
 		// TODO: Insert data into your database.
 		// Show an error message if you can not make the reservation.
 		
-		JOptionPane.showMessageDialog(null, "Create order for " + c.Name + " for " + Integer.toString(LineItems.length) + " items.");
+		JOptionPane.showMessageDialog(null, "Reservation on flight " + f.FlightNumber + " for " + p.Name + " in seat " + Seat + " eating " + Meal + " and with notes: " + Notes);
 	}
 }

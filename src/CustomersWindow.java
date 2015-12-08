@@ -4,11 +4,9 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DateFormat;
-import javax.swing.BoxLayout;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -35,9 +33,6 @@ public class CustomersWindow extends JFrame{
 	 */
 	private static final long serialVersionUID = 1242405414797815636L;
 	private JPanel jPanel1;
-	private JButton jButton1;
-	private JPanel jPanel3;
-	private JPanel jPanel2;
 	private JTable jTable1;
 	private JComboBox jComboBox1;
 	private JLabel jLabel1;
@@ -50,21 +45,6 @@ public class CustomersWindow extends JFrame{
 		pack();
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
-		{
-			jPanel3 = new JPanel();
-			getContentPane().add(jPanel3, BorderLayout.WEST);
-			jPanel3.setPreferredSize(new java.awt.Dimension(93, 185));
-			{
-				jButton1 = new JButton();
-				jPanel3.add(jButton1);
-				jButton1.setText("Order Details");
-				jButton1.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent evt) {
-						jButton1ActionPerformed(evt);
-					}
-				});
-			}
-		}
 	}
 	private void initGUI() {
 		try {
@@ -77,7 +57,7 @@ public class CustomersWindow extends JFrame{
 				{
 					jLabel1 = new JLabel();
 					jPanel1.add(jLabel1);
-					jLabel1.setText("Choose Customer:");
+					jLabel1.setText("Choose Passenger:");
 				}
 				{
 					ComboBoxModel jComboBox1Model = 
@@ -93,23 +73,16 @@ public class CustomersWindow extends JFrame{
 				}
 			}
 			{
-				jPanel2 = new JPanel();
-				BoxLayout jPanel2Layout = new BoxLayout(jPanel2, javax.swing.BoxLayout.Y_AXIS);
-				jPanel2.setLayout(jPanel2Layout);
-				getContentPane().add(jPanel2, BorderLayout.CENTER);
-				jPanel2.setPreferredSize(new java.awt.Dimension(792, 187));
+				jScrollPane1 = new JScrollPane();
+				getContentPane().add(jScrollPane1, BorderLayout.CENTER);
 				{
-					jScrollPane1 = new JScrollPane();
-					jPanel2.add(jScrollPane1);
-					{
-						jTable1Model = 
-							new DefaultTableModel(
-									new String[] { "Order Date", "Status", "Total", "Ship To", "Billing To"},0);
-						jTable1 = new JTable();
-						jScrollPane1.setViewportView(jTable1);
-						jTable1.setModel(jTable1Model);
-						jTable1.setPreferredSize(new Dimension(800,100));
-					}
+					jTable1Model = 
+						new DefaultTableModel(
+								new String[] { "Flight #", "From", "To", "Departs", "Arrives","Seat","Meal","Price","Notes" },0);
+					jTable1 = new JTable();
+					jScrollPane1.setViewportView(jTable1);
+					jTable1.setModel(jTable1Model);
+					jTable1.setPreferredSize(new Dimension(800,100));
 				}
 			}
 			{
@@ -122,39 +95,34 @@ public class CustomersWindow extends JFrame{
 	}
 	
 	private void jComboBox1ActionPerformed(ActionEvent evt) {
-		Customer c = (Customer) jComboBox1.getSelectedItem();
+		Passenger p = (Passenger) jComboBox1.getSelectedItem();
 		
-		if (c != null)
+		if (p != null)
 		{
 			this.jTable1Model.setRowCount(0);
 		
 			DateFormat df = DateFormat.getDateTimeInstance();
-			Order [] orders = DatabaseAccess.GetCustomerOrders(c);
-			if (orders!= null)
+			Reservation [] reservations = DatabaseAccess.GetCustomerRervations(p);
+			if (reservations != null)
 			{
-				for (int i=0;i<orders.length;i++)
+				for (int i=0;i<reservations.length;i++)
 				{
-					Order o = orders[i];
+					Reservation r = reservations[i];
 					jTable1Model.addRow(
 								new Object[] { 
-									df.format(o.OrderDate),
-									o,
-									o.TotalCost,
-									o.ShippingAddress,
-									o.BillingAddress}
+									r.Flight.FlightNumber,
+									r.Flight.DepartureAirport.AirportName,
+									r.Flight.ArrivalAirport.AirportName,
+									df.format(r.Flight.DepartureTime),
+									df.format(r.Flight.ArrivalTime),
+									r.Seat,
+									r.MealOptions,
+									Double.toString(r.PricePaid),
+									r.NotesAboutReservation
+								}
 							);
 				}
 			}
-		}
-	}
-	
-	private void jButton1ActionPerformed(ActionEvent evt) {
-		int row = jTable1.getSelectedRow();
-		if (row >= 0)
-		{
-			Order o = (Order) jTable1Model.getValueAt(row, 1);
-			Order oDetail = DatabaseAccess.GetOrderDetails(o.OrderID);
-			new OrderDetailsWindow(oDetail);
 		}
 	}
 
