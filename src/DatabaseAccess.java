@@ -1,10 +1,26 @@
 import java.util.Date;
 import java.util.Vector;
-
+import java.sql.* ;  // for standard JDBC programs
 import javax.swing.JOptionPane;
 
 
 public class DatabaseAccess {
+	private Connection conn;
+
+	public DatabaseAccess() {
+		try{
+			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+			//Set login info here
+			String url = "jdbc:sqlserver://is-fleming.ischool.uw.edu";
+			String user = "perry";
+			String pass = "Info340C";
+
+			conn = DriverManager.getConnection(url, user, pass);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public static Airport[] GetAirportCities()
 	{
