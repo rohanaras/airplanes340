@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 public class DatabaseAccess {
 	private static Connection conn;
 
-	public DatabaseAccess() {
+	public static void createDatabaseAccess() {
 		try{
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
@@ -22,10 +22,27 @@ public class DatabaseAccess {
 			e.printStackTrace();
 		}
 	}
+
+//	public DatabaseAccess() {
+//		try{
+//			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+//
+//			//Set login info here
+//			String url = "jdbc:sqlserver://is-fleming.ischool.uw.edu";
+//			String user = "perry";
+//			String pass = "Info340C";
+//
+//			conn = DriverManager.getConnection(url, user, pass);
+//		}catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 	
 	public static Airport[] GetAirportCities()
 	{
+		createDatabaseAccess();
 		try{
+			System.out.println("uphere");
 			//Set the SQL query here
 			String query = "SELECT airport.city FROM airport";
 
