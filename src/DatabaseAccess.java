@@ -22,27 +22,11 @@ public class DatabaseAccess {
 			e.printStackTrace();
 		}
 	}
-
-//	public DatabaseAccess() {
-//		try{
-//			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-//
-//			//Set login info here
-//			String url = "jdbc:sqlserver://is-fleming.ischool.uw.edu";
-//			String user = "perry";
-//			String pass = "Info340C";
-//
-//			conn = DriverManager.getConnection(url, user, pass);
-//		}catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
 	
 	public static Airport[] GetAirportCities()
 	{
 		createDatabaseAccess();
 		try{
-			System.out.println("uphere");
 			//Set the SQL query here
 			String query = "SELECT airport.city FROM airport";
 
@@ -73,34 +57,95 @@ public class DatabaseAccess {
 		// resultset.findcolumn(string col)
 		//return new Airport[] { new Airport(1,"Seattle"), new Airport(2,"Portland") };
 	}
-	
+
+	//Returns the most recent seat price for a given flightID
+	public static float getCurrentPrice(int flight) {
+		createDatabaseAccess();
+		try{
+			//Set the SQL query here
+			String query = "SELECT TOP 1 reservationPrice FROM Reservation WHERE flightID = " + flight + " ORDER BY reservationDate DESC";
+
+			//Set database here
+			conn.setCatalog("AirlineReservation");
+
+			//Call query and store in memory as rs
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			//While results has next, print name
+			while(rs.next()){
+				return(rs.getFloat("reservationPrice"));
+			}
+
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
 	public static Flight[] GetFlights(Airport DepartAirport, Airport ArriveAirport, Date DepartureDate )
 	{
 		Vector<Flight> vFlights = new Vector<Flight>();
-		
+		try{
+			//Set the SQL query here
+			String query = "SELECT * FROM Flight";
+
+
+			//Set database here
+			conn.setCatalog("AirlineReservation");
+
+			//Call query and store in memory as rs
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			//While results has next, print name
+			ArrayList<String> al = new ArrayList<String>();
+			while(rs.next()){
+				Flight f = new Flight();
+				f.FlightID = rs.getInt("flightID");
+				f.ArrivalAirport = new Airport(1,"SEATTLE"); //need to work on airports
+				f.DepartureAirport = new Airport(1,"Portland");
+				f.ArrivalTime = rs.getDate("scheduledArrTime"); //need to work on times
+				f.DepartureTime = rs.getDate("scheduledDeptTime");
+				f.BasePrice = rs.getFloat("basePrice");
+				f.Capacity = 10;
+				f.CurrentPrice = getCurrentPrice(f.FlightID);
+				f.FlightNumber = rs.getString("flightNumber");
+				f.Reservations = null;	// Don't need to load these now.
+				vFlights.add(f);
+			}
+
+			Flight [] arrFlights = new Flight[vFlights.size()];
+			vFlights.toArray(arrFlights);
+			return arrFlights;
+
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 		
 		// TODO:  Query the database and retrieve the information.
 		// Loop through the row results, creating a new flight for each row.
 		//  Add those flights to the vFlights vector.
 
 		// DUMMY DATA FOLLOWS
-		Flight f = new Flight();
-		f.FlightID = 1;	// ID from the DB..
-		f.ArrivalAirport = new Airport(1,"Seattle");
-		f.DepartureAirport = new Airport(1,"Portland");
-		f.ArrivalTime = new Date();
-		f.DepartureTime = new Date();
-		f.BasePrice = 150;
-		f.Capacity = 10;
-		f.CurrentPrice = 300;
-		f.FlightNumber = "642";
-		f.Reservations = null;	// Don't need to load these now.
+//		Flight f = new Flight();
+//		f.FlightID = 1;	// ID from the DB..
+//		f.ArrivalAirport = new Airport(1,"Seattle");
+//		f.DepartureAirport = new Airport(1,"Portland");
+//		f.ArrivalTime = new Date();
+//		f.DepartureTime = new Date();
+//		f.BasePrice = 150;
+//		f.Capacity = 10;
+//		f.CurrentPrice = 300;
+//		f.FlightNumber = "642";
+//		f.Reservations = null;	// Don't need to load these now.
 	
-		vFlights.add(f);
-
-		Flight [] arrFlights = new Flight[vFlights.size()];
-		vFlights.toArray(arrFlights);
-		return arrFlights;
+//		vFlights.add(f);
+//
+//		Flight [] arrFlights = new Flight[vFlights.size()];
+//		vFlights.toArray(arrFlights);
+//		return arrFlights;
 	}
 
 	public static Flight GetFlightDetails(int FlightID)
