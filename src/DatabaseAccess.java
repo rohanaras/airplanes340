@@ -6,7 +6,7 @@ import javax.swing.JOptionPane;
 
 
 public class DatabaseAccess {
-	private Connection conn;
+	private static Connection conn;
 
 	public DatabaseAccess() {
 		try{
@@ -26,17 +26,8 @@ public class DatabaseAccess {
 	public static Airport[] GetAirportCities()
 	{
 		try{
-			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-
-			//Set login info here
-			String url = "jdbc:sqlserver://is-fleming.ischool.uw.edu";
-			String user = "perry";
-			String pass = "Info340C";
-
 			//Set the SQL query here
 			String query = "SELECT airport.city FROM airport";
-
-			Connection conn = DriverManager.getConnection(url, user, pass);
 
 			//Set database here
 			conn.setCatalog("AirlineReservation");
