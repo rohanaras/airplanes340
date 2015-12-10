@@ -1,6 +1,5 @@
 import java.util.Date;
 
-
 public class Flight {
 	public int FlightID;
 	public String FlightNumber;

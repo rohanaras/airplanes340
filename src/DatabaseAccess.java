@@ -88,7 +88,7 @@ public class DatabaseAccess {
 		Vector<Flight> vFlights = new Vector<Flight>();
 		try{
 			//Set the SQL query here
-			String query = "SELECT * FROM Flight";
+			String query = "SELECT * FROM Flight JOIN Aircraft ON Flight.aircraftID = Aircraft.aircraftID";
 
 
 			//Set database here
@@ -105,10 +105,10 @@ public class DatabaseAccess {
 				f.FlightID = rs.getInt("flightID");
 				f.ArrivalAirport = new Airport(1,"SEATTLE"); //need to work on airports
 				f.DepartureAirport = new Airport(1,"Portland");
-				f.ArrivalTime = rs.getDate("scheduledArrTime"); //need to work on times
-				f.DepartureTime = rs.getDate("scheduledDeptTime");
+				f.ArrivalTime = rs.getTimestamp("scheduledArrTime");
+				f.DepartureTime = rs.getTimestamp("scheduledDeptTime");
 				f.BasePrice = rs.getFloat("basePrice");
-				f.Capacity = 10;
+				f.Capacity = rs.getInt("numberOfSeats");
 				f.CurrentPrice = getCurrentPrice(f.FlightID);
 				f.FlightNumber = rs.getString("flightNumber");
 				f.Reservations = null;	// Don't need to load these now.
