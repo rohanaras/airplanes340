@@ -99,7 +99,6 @@ public class DatabaseAccess {
 			ResultSet rs = stmt.executeQuery(query);
 
 			//While results has next, print name
-			ArrayList<String> al = new ArrayList<String>();
 			while(rs.next()){
 				Flight f = new Flight();
 				f.FlightID = rs.getInt("flightID");
@@ -180,17 +179,48 @@ public class DatabaseAccess {
 	
 	public static Passenger [] GetCustomers ()
 	{
+		createDatabaseAccess();
+		try{
+			//Set the SQL query here
+			String query = "SELECT passengerID, firstName, lastName FROM Passenger";
+
+			//Set database here
+			conn.setCatalog("AirlineReservation");
+
+			//Call query and store in memory as rs
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			//While results has next, print name
+			ArrayList<Passenger> al = new ArrayList<Passenger>();
+			while(rs.next()){
+				Passenger p = new Passenger();
+				p.Name = rs.getString("firstName");
+				p.PassengerID = rs.getInt("passengerID");
+				al.add(p);
+			}
+
+			Passenger [] arrPassenger = new Passenger[al.size()];
+			al.toArray(arrPassenger);
+			return arrPassenger;
+
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+
+
 		// TODO:  Query the database to retrieve a list of customers.
 		
 		// DUMMY VALUES FOLLOW
-		Passenger a = new Passenger();
-		a.Name = "Kevin";
-		Passenger b = new Passenger();
-		b.Name = "Niki";
-		Passenger c = new Passenger();
-		c.Name = "Ava";
-		
-		return new Passenger [] {a,b,c};
+//		Passenger a = new Passenger();
+//		a.Name = "Kevin";
+//		Passenger b = new Passenger();
+//		b.Name = "Niki";
+//		Passenger c = new Passenger();
+//		c.Name = "Ava";
+//
+//		return new Passenger [] {a,b,c};
 	}
 	
 	public static Reservation [] GetCustomerRervations (Passenger p)
