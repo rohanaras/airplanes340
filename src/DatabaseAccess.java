@@ -63,6 +63,7 @@ public class DatabaseAccess {
 		createDatabaseAccess();
 		try{
 			//Set the SQL query here
+			//Selects the price for the most recent reservation given a flight number
 			String query = "SELECT TOP 1 reservationPrice FROM Reservation WHERE flightID = " + flight + " ORDER BY reservationDate DESC";
 
 			//Set database here
@@ -88,8 +89,8 @@ public class DatabaseAccess {
 		Vector<Flight> vFlights = new Vector<Flight>();
 		try{
 			//Set the SQL query here
+			//Returns flights joined with aircraft for capacity
 			String query = "SELECT * FROM Flight JOIN Aircraft ON Flight.aircraftID = Aircraft.aircraftID";
-
 
 			//Set database here
 			conn.setCatalog("AirlineReservation");
@@ -98,7 +99,7 @@ public class DatabaseAccess {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 
-			//While results has next, print name
+			//While results has next, create flight and add it to vFlights
 			while(rs.next()){
 				Flight f = new Flight();
 				f.FlightID = rs.getInt("flightID");
@@ -114,8 +115,11 @@ public class DatabaseAccess {
 				vFlights.add(f);
 			}
 
+			// Turn vFlights into the Flight array
 			Flight [] arrFlights = new Flight[vFlights.size()];
 			vFlights.toArray(arrFlights);
+
+			//Return array of Flights
 			return arrFlights;
 
 		}catch (Exception e) {
@@ -182,6 +186,7 @@ public class DatabaseAccess {
 		createDatabaseAccess();
 		try{
 			//Set the SQL query here
+			//Returns passenger ID, fName, and lName
 			String query = "SELECT passengerID, firstName, lastName FROM Passenger";
 
 			//Set database here
@@ -191,7 +196,7 @@ public class DatabaseAccess {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 
-			//While results has next, print name
+			//While results has next, create new passenger
 			ArrayList<Passenger> al = new ArrayList<Passenger>();
 			while(rs.next()){
 				Passenger p = new Passenger();
@@ -199,7 +204,7 @@ public class DatabaseAccess {
 				p.PassengerID = rs.getInt("passengerID");
 				al.add(p);
 			}
-
+			
 			Passenger [] arrPassenger = new Passenger[al.size()];
 			al.toArray(arrPassenger);
 			return arrPassenger;
