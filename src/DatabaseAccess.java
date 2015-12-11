@@ -146,7 +146,7 @@ public class DatabaseAccess {
 //		f.CurrentPrice = 300;
 //		f.FlightNumber = "642";
 //		f.Reservations = null;	// Don't need to load these now.
-	
+//
 //		vFlights.add(f);
 //
 //		Flight [] arrFlights = new Flight[vFlights.size()];
@@ -231,26 +231,71 @@ public class DatabaseAccess {
 //		return new Passenger [] {a,b,c};
 	}
 	
-	public static Reservation [] GetCustomerRervations (Passenger p)
+	public static Reservation [] GetCustomerReservations(Passenger p)
 	{
-		Reservation r = new Reservation();
-		r.Flight = new Flight();
-		r.Flight.ArrivalAirport = new Airport(0, "Seattle");
-		r.Flight.DepartureAirport = new Airport(0, "Las Vegas");
-		r.Flight.ArrivalTime = new Date();
-		r.Flight.DepartureTime = new Date();
-		r.Flight.BasePrice = 150;
-		r.Flight.CurrentPrice = 300;
-		r.Flight.FlightNumber = "154";
-		r.MealOptions = "Steak";
-		r.Seat = "14B";
-		r.Passenger = new Passenger();
-		r.Passenger.Name = "Kevin";
-		r.NotesAboutReservation = "Has a baby.";
-		r.PricePaid = 180;
-		return new Reservation [] { r };
+		createDatabaseAccess();
+		try{
+			//Set the SQL query here
+			//Returns passenger ID, fName, and lName
+			String query = "SELECT * FROM Reservation JOIN Flight ON Flight.flightID = Reservation.flightID JOIN Passenger ON Reservation.passengerID = Passenger.passengerID";
+
+			//Set database here
+			conn.setCatalog("AirlineReservation");
+
+			//Call query and store in memory as rs
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			//While results has next, create new passenger
+			ArrayList<Reservation> al = new ArrayList<Reservation>();
+			while(rs.next()){
+				Reservation r = new Reservation();
+				r.Flight = new Flight();
+				int flightID = rs.getInt("flightID");
+				r.Flight.ArrivalAirport = new Airport(1,"SEATTLE"); //need to work on airports
+				r.Flight.DepartureAirport = new Airport(1,"Portland");
+				r.Flight.ArrivalTime = rs.getTimestamp("scheduledArrTime");
+				r.Flight.DepartureTime = rs.getTimestamp("scheduledDeptTime");
+				r.Flight.BasePrice = rs.getFloat("basePrice");
+				r.Flight.CurrentPrice = getCurrentPrice(flightID);
+				r.Flight.FlightNumber = rs.getString("flightNumber");
+				r.MealOptions = rs.getString("mealType");
+				r.Seat = rs.getString("seatNumber");
+				r.Passenger = new Passenger();
+				r.Passenger.Name = rs.getString("firstName");
+				r.Passenger.PassengerID = rs.getInt("passengerID");
+				r.NotesAboutReservation = rs.getString("reservationNotes");
+				r.PricePaid = rs.getFloat("reservationPrice");
+				al.add(r);
+			}
+
+			Reservation [] arrReservation = new Reservation[al.size()];
+			al.toArray(arrReservation);
+			return arrReservation;
+
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+
+//		r.Flight = new Flight();
+//		r.Flight.ArrivalAirport = new Airport(0, "Seattle");
+//		r.Flight.DepartureAirport = new Airport(0, "Las Vegas");
+//		r.Flight.ArrivalTime = new Date();
+//		r.Flight.DepartureTime = new Date();
+//		r.Flight.BasePrice = 150;
+//		r.Flight.CurrentPrice = 300;
+//		r.Flight.FlightNumber = "154";
+//		r.MealOptions = "Steak";
+//		r.Seat = "14B";
+//		r.Passenger = new Passenger();
+//		r.Passenger.Name = "Kevin";
+//		r.NotesAboutReservation = "Has a baby.";
+//		r.PricePaid = 180;
+//		return new Reservation [] { r };
 	}
-	
+
+	//DO NOT DO
 	public static Reservation [] SearchReservationNotes(String query)
 	{
 		Reservation r = new Reservation();
