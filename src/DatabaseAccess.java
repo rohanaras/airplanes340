@@ -7,6 +7,7 @@ import javax.swing.JOptionPane;
 
 public class DatabaseAccess {
 	private static Connection conn;
+	private static Map<String, Airport> airports;
 
 	public static void createDatabaseAccess() {
 		try{
@@ -26,9 +27,10 @@ public class DatabaseAccess {
 	public static Airport[] GetAirportCities()
 	{
 		createDatabaseAccess();
+		airports = new TreeMap<>();
 		try{
 			//Set the SQL query here
-			String query = "SELECT airport.city FROM airport";
+			String query = "SELECT airportCode, city FROM airport";
 
 			//Set database here
 			conn.setCatalog("AirlineReservation");
@@ -38,14 +40,15 @@ public class DatabaseAccess {
 			ResultSet rs = stmt.executeQuery(query);
 
 			//While results has next, print name
-			ArrayList<String> al = new ArrayList<String>();
+			int i = 0;
 			while(rs.next()){
-				al.add(rs.getString("city"));
+				i++;
+				airports.put(rs.getString("airportCode"), new Airport(i, rs.getString("city")));
 			}
 
-			Airport[] a = new Airport[al.size()];
-			for (int i = 0; i < al.size(); i++) {
-				a[i] = new Airport(i, al.get(i));
+			Airport[] a = new Airport[airports.size()];
+			for (Airport airport : airports.values()) {
+				a[airport.AirportID - 1] = airport;
 			}
 			return a;
 
