@@ -102,7 +102,7 @@ public class CustomersWindow extends JFrame{
 			this.jTable1Model.setRowCount(0);
 		
 			DateFormat df = DateFormat.getDateTimeInstance();
-			Reservation [] reservations = DatabaseAccess.GetCustomerRervations(p);
+			Reservation [] reservations = DatabaseAccess.GetCustomerReservations(p);
 			if (reservations != null)
 			{
 				for (int i=0;i<reservations.length;i++)

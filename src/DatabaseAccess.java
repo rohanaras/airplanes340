@@ -143,7 +143,7 @@ public class DatabaseAccess {
 //		f.CurrentPrice = 300;
 //		f.FlightNumber = "642";
 //		f.Reservations = null;	// Don't need to load these now.
-	
+//
 //		vFlights.add(f);
 //
 //		Flight [] arrFlights = new Flight[vFlights.size()];
@@ -228,7 +228,7 @@ public class DatabaseAccess {
 //		return new Passenger [] {a,b,c};
 	}
 	
-	public static Reservation [] GetCustomerRervations (Passenger p)
+	public static Reservation [] GetCustomerReservations(Passenger p)
 	{
 		Reservation r = new Reservation();
 		r.Flight = new Flight();
