@@ -328,6 +328,10 @@ public class DatabaseAccess {
 			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 			conn.setAutoCommit(false);
 
+			String numSeats = "SELECT a.numberOfSeats FROM aircraft a" +
+					"	JOIN flight f ON f.aircraftID = a.aircraftID" +
+					"	WHERE f.ID = " + f.FlightID;
+
 			//Set the SQL query here
 			String query = "INSERT INTO reservation VALUES (?,?,?,?,?,?,?);";
 			PreparedStatement stmt = conn.prepareStatement(query);
