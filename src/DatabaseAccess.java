@@ -106,14 +106,15 @@ public class DatabaseAccess {
 			while(rs.next()){
 				Flight f = new Flight();
 				f.FlightID = rs.getInt("flightID");
-				f.ArrivalAirport = new Airport(1,"SEATTLE"); //need to work on airports
-				f.DepartureAirport = new Airport(1,"Portland");
+				f.FlightNumber = rs.getString("flightNumber");
+				f.ArrivalAirport = airports.get(rs.getString("destinationCode"));
+				f.DepartureAirport = airports.get(rs.getString("originCode"));
 				f.ArrivalTime = rs.getTimestamp("scheduledArrTime");
+				System.out.println(f.ArrivalTime);
 				f.DepartureTime = rs.getTimestamp("scheduledDeptTime");
 				f.BasePrice = rs.getFloat("basePrice");
 				f.Capacity = rs.getInt("numberOfSeats");
 				f.CurrentPrice = getCurrentPrice(f.FlightID);
-				f.FlightNumber = rs.getString("flightNumber");
 				f.Reservations = null;	// Don't need to load these now.
 				vFlights.add(f);
 			}
@@ -276,8 +277,8 @@ public class DatabaseAccess {
 				Reservation r = new Reservation();
 				r.Flight = new Flight();
 				int flightID = rs.getInt("flightID");
-				r.Flight.ArrivalAirport = new Airport(1,"SEATTLE"); //need to work on airports
-				r.Flight.DepartureAirport = new Airport(1,"Portland");
+				r.Flight.ArrivalAirport = airports.get(rs.getString("destinationCode"));
+				r.Flight.DepartureAirport = airports.get(rs.getString("originCode"));
 				r.Flight.ArrivalTime = rs.getTimestamp("scheduledArrTime");
 				r.Flight.DepartureTime = rs.getTimestamp("scheduledDeptTime");
 				r.Flight.BasePrice = rs.getFloat("basePrice");
