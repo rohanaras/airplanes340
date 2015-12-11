@@ -319,9 +319,36 @@ public class DatabaseAccess {
 	                    
 	public static void MakeReservation(Flight f, Passenger p, String Seat, String Meal, String Notes)
 	{
-		// TODO: Insert data into your database.
-		// Show an error message if you can not make the reservation.
-		
-		JOptionPane.showMessageDialog(null, "Reservation on flight " + f.FlightNumber + " for " + p.Name + " in seat " + Seat + " eating " + Meal + " and with notes: " + Notes);
+		createDatabaseAccess();
+		try{
+			//Set the SQL query here
+			String query = "INSERT INTO reservation VALUES (" + p.PassengerID + ","
+					+ f.FlightID + "," + Seat + "," + Meal + "," + f.CurrentPrice
+					+ ",GETDATE()," + Notes + ");";
+			/*PreparedStatement stmt = conn.prepareStatement(query);
+
+			stmt.setInt(1, p.PassengerID);
+			stmt.setInt(2, f.FlightID);
+			stmt.setString(3, Seat);
+			stmt.setString(4, Meal);
+			stmt.setFloat(5, f.CurrentPrice);
+			stmt.setDate(6, );
+			*/
+
+			//Set database here
+			conn.setCatalog("AirlineReservation");
+
+			//Call query and store in memory as rs
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			JOptionPane.showMessageDialog(null, "Reservation on flight " + f.FlightNumber + " for " + p.Name + " in seat " + Seat + " eating " + Meal + " and with notes: " + Notes);
+
+		}catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "lolol didn't work");
+		}
+
+		JOptionPane.showMessageDialog(null, "too bad");
 	}
 }
