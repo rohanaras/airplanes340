@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 public class DatabaseAccess {
 	private static Connection conn;
 	private static Map<String, Airport> airports;
+	private static Map<Integer, Passenger> passengers;
 
 	public static void createDatabaseAccess() {
 		try{
@@ -39,7 +40,6 @@ public class DatabaseAccess {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 
-			//While results has next, print name
 			int i = 0;
 			while(rs.next()){
 				i++;
@@ -157,37 +157,73 @@ public class DatabaseAccess {
 
 	public static Flight GetFlightDetails(int FlightID)
 	{
-		// TODO:  Query the database to get the flight information as well as all 
-		// the reservations.
-		
-		// DUMMY DATA FOLLOWS
 		Flight f = new Flight();
-		f.FlightID = 1;	// ID from the DB..
-		f.ArrivalAirport = new Airport(1,"Seattle");
-		f.DepartureAirport = new Airport(1,"Portland");
-		f.ArrivalTime = new Date();
-		f.DepartureTime = new Date();
-		f.BasePrice = 150;
-		f.Capacity = 10;
-		f.CurrentPrice = 300;
-		f.FlightNumber = "642";
-		
-		Reservation r = new Reservation();
-		r.Flight = f;
-		r.MealOptions = "Steak";
-		r.Seat = "14B";
-		r.Passenger = new Passenger();
-		r.Passenger.Name = "Kevin";
-		r.NotesAboutReservation = "Has a baby.";
-		r.PricePaid = 154;
-		f.Reservations = new Reservation [] { r };
-		
+		try{
+			//Set the SQL query here
+			//Selects the price for the most recent reservation given a flight number
+			String query = "SELECT * FROM Flight WHERE flightID=" + FlightID;
+
+			//Set database here
+			conn.setCatalog("AirlineReservation");
+
+			//Call query and store in memory as rs
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+
+			//While results has next, print name
+			while(rs.next()){
+				f.FlightID = 1;	// ID from the DB..
+				f.ArrivalAirport = airports.get(rs.getString("destinationCode"));
+				f.DepartureAirport = airports.get(rs.getString("originCode"));
+				f.ArrivalTime = getProperDateTime(rs.getTimestamp("scheduledArrTime"));
+				f.DepartureTime = getProperDateTime(rs.getTimestamp("scheduledDeptTime"));
+				f.BasePrice = rs.getFloat("basePrice");
+				f.Capacity = 10; //TODO
+				f.CurrentPrice = 300; //TODO
+				f.FlightNumber = rs.getString("flightNumber");
+			}
+
+			/** Getting the reservation information **/
+
+			query = "SELECT mealType, seatNumber, reservationNotes, reservationPrice, firstName, lastName, " +
+					"Passenger.passengerID FROM Reservation JOIN Passenger ON Reservation.PassengerID=Passenger.passengerID " +
+					"WHERE flightID=" + FlightID;
+
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(query);
+
+			if (passengers == null) { GetCustomers(); }
+
+			ArrayList<Reservation> reservations = new ArrayList<>();
+			while(rs.next()) {
+				Reservation r = new Reservation();
+				r.Flight = f;
+				r.MealOptions = rs.getString("mealType");
+				r.Seat = rs.getString("seatNumber");
+				r.Passenger = passengers.get(rs.getInt("passengerID"));
+				r.Passenger.Name = rs.getString("firstName") + " " + rs.getString("lastName");
+				r.NotesAboutReservation = rs.getString("reservationNotes");
+				r.PricePaid = rs.getFloat("reservationPrice");
+				reservations.add(r);
+			}
+			f.Reservations = new Reservation[reservations.size()];
+			f.Reservations = reservations.toArray(f.Reservations);
+
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		return f;	
 	}
-	
+
+	public static Date getProperDateTime(Timestamp timestamp) {
+		return new java.util.Date(timestamp.getTime());
+	}
+
 	public static Passenger [] GetCustomers ()
 	{
 		createDatabaseAccess();
+		passengers = new TreeMap<>();
 		try{
 			//Set the SQL query here
 			//Returns passenger ID, fName, and lName
@@ -201,35 +237,23 @@ public class DatabaseAccess {
 			ResultSet rs = stmt.executeQuery(query);
 
 			//While results has next, create new passenger
-			ArrayList<Passenger> al = new ArrayList<Passenger>();
 			while(rs.next()){
-				Passenger p = new Passenger();
-				p.Name = rs.getString("firstName");
-				p.PassengerID = rs.getInt("passengerID");
-				al.add(p);
+				passengers.put(rs.getInt("passengerID"), new Passenger(rs.getInt("passengerID"),
+						rs.getString("firstName") + ' ' + rs.getString("lastName")));
 			}
-			
-			Passenger [] arrPassenger = new Passenger[al.size()];
-			al.toArray(arrPassenger);
-			return arrPassenger;
+
+			Passenger[] p = new Passenger[passengers.size()];
+			int i = 0;
+			for (Passenger passenger : passengers.values()) {
+				p[i] = passenger;
+				i++;
+			}
+			return p;
 
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
-
-
-		// TODO:  Query the database to retrieve a list of customers.
-		
-		// DUMMY VALUES FOLLOW
-//		Passenger a = new Passenger();
-//		a.Name = "Kevin";
-//		Passenger b = new Passenger();
-//		b.Name = "Niki";
-//		Passenger c = new Passenger();
-//		c.Name = "Ava";
-//
-//		return new Passenger [] {a,b,c};
 	}
 	
 	public static Reservation [] GetCustomerReservations(Passenger p)
@@ -262,7 +286,7 @@ public class DatabaseAccess {
 				r.Flight.FlightNumber = rs.getString("flightNumber");
 				r.MealOptions = rs.getString("mealType");
 				r.Seat = rs.getString("seatNumber");
-				r.Passenger = new Passenger();
+				r.Passenger = passengers.get(rs.getInt("passengerID"));
 				r.Passenger.Name = rs.getString("firstName");
 				r.Passenger.PassengerID = rs.getInt("passengerID");
 				r.NotesAboutReservation = rs.getString("reservationNotes");
@@ -310,7 +334,7 @@ public class DatabaseAccess {
 		r.Flight.FlightNumber = "154";
 		r.MealOptions = "Steak";
 		r.Seat = "14B";
-		r.Passenger = new Passenger();
+		r.Passenger = passengers.get(0);
 		r.Passenger.Name = "Kevin";
 		r.NotesAboutReservation = "Has a baby.";
 		r.PricePaid = 180;
