@@ -1,5 +1,7 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+// min
+import java.util.*;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -224,6 +226,7 @@ public class AirlineMainWindow {
 		Flight[] flights = DatabaseAccess.GetFlights((Airport)jComboBox1.getSelectedItem(), 
 								  (Airport)jComboBox2.getSelectedItem(), 
 								  deptDate);
+
 
 		df = java.text.DateFormat.getTimeInstance();
 		for (int i=0;i<flights.length;i++)

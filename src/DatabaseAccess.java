@@ -93,7 +93,10 @@ public class DatabaseAccess {
 		try{
 			//Set the SQL query here
 			//Returns flights joined with aircraft for capacity
-			String query = "SELECT * FROM Flight JOIN Aircraft ON Flight.aircraftID = Aircraft.aircraftID";
+
+			String query = "SELECT * FROM Flight JOIN Aircraft ON Flight.aircraftID = Aircraft.aircraftID WHERE originCode = (SELECT airportCode FROM Airport WHERE city = '" + DepartAirport.toString() + "') AND destinationCode = (SELECT airportCode FROM airport WHERE city = '" + ArriveAirport.toString() + "')";
+
+
 
 			//Set database here
 			conn.setCatalog("AirlineReservation");
@@ -110,7 +113,6 @@ public class DatabaseAccess {
 				f.ArrivalAirport = airports.get(rs.getString("destinationCode"));
 				f.DepartureAirport = airports.get(rs.getString("originCode"));
 				f.ArrivalTime = rs.getTimestamp("scheduledArrTime");
-				System.out.println(f.ArrivalTime);
 				f.DepartureTime = rs.getTimestamp("scheduledDeptTime");
 				f.BasePrice = rs.getFloat("basePrice");
 				f.Capacity = rs.getInt("numberOfSeats");
@@ -227,7 +229,7 @@ public class DatabaseAccess {
 		try{
 			//Set the SQL query here
 			//Returns passenger ID, fName, and lName
-			String query = "SELECT passengerID, firstName, lastName FROM Passenger";
+			String query = "SELECT passengerID, firstName FROM Passenger";
 
 			//Set database here
 			conn.setCatalog("AirlineReservation");
@@ -262,7 +264,10 @@ public class DatabaseAccess {
 		try{
 			//Set the SQL query here
 			//Returns passenger ID, fName, and lName
-			String query = "SELECT * FROM Reservation JOIN Flight ON Flight.flightID = Reservation.flightID JOIN Passenger ON Reservation.passengerID = Passenger.passengerID";
+			String query = "SELECT Flight.flightID, destinationCode, originCode, scheduledArrTime," +
+					"scheduledDeptTime, basePrice, flightNumber, mealType, seatNumber, firstName," +
+					"Reservation.passengerID, reservationNotes, reservationPrice FROM Reservation JOIN Flight ON Flight.flightID = Reservation.flightID JOIN Passenger ON Reservation.passengerID = Passenger.passengerID" +
+					" WHERE Reservation.passengerID = '" + p.PassengerID + "'";
 
 			//Set database here
 			conn.setCatalog("AirlineReservation");
@@ -274,6 +279,7 @@ public class DatabaseAccess {
 			//While results has next, create new passenger
 			ArrayList<Reservation> al = new ArrayList<Reservation>();
 			while(rs.next()){
+
 				Reservation r = new Reservation();
 				r.Flight = new Flight();
 				int flightID = rs.getInt("flightID");
