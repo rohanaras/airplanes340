@@ -193,7 +193,7 @@ public class DatabaseAccess {
 			/** Getting the reservation information **/
 
 			query = "SELECT mealType, seatNumber, reservationNotes, reservationPrice, firstName, lastName, " +
-					"Passenger.passengerID FROM Reservation JOIN Passenger ON Reservation.PassengerID=Passenger.passengerID " +
+					"Passenger.passengerID FROM Reservation JOIN Passenger ON Reservation.PassengerID=passengerID " +
 					"WHERE flightID=" + FlightID;
 			rs = stmt.executeQuery(query);
 
@@ -308,10 +308,44 @@ public class DatabaseAccess {
 		return new Reservation [] { r };
 	}
 	                    
-	public static void MakeReservation(Flight f, Passenger p, String Seat, String Meal, String Notes) {
-		// TODO: Insert data into your database.
-		// Show an error message if you can not make the reservation.
-		
-		JOptionPane.showMessageDialog(null, "Reservation on flight " + f.FlightNumber + " for " + p.Name + " in seat " + Seat + " eating " + Meal + " and with notes: " + Notes);
+	public static void MakeReservation(Flight f, Passenger p, String Seat, String Meal, String Notes)
+	{
+		createDatabaseAccess();
+
+		try{
+			String seatsTaken = "SELECT COUNT(*) FROM reservation r" +
+					"WHERE r.flightID = " + f.FlightID +
+					"GROUP BY r.flightID";
+			int numSeats = Integer.parseInt(seatsTaken);
+
+			if (numSeats == f.Capacity - 1) {
+				conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+				conn.setAutoCommit(false);
+			}
+
+			//Set the SQL query here
+			String query = "INSERT INTO reservation VALUES (?,?,?,?,?,?,?);";
+			PreparedStatement stmt = conn.prepareStatement(query);
+
+			stmt.setInt(1, p.PassengerID);
+			stmt.setInt(2, f.FlightID);
+			stmt.setString(3, Seat);
+			stmt.setString(4, Meal);
+			stmt.setFloat(5, f.CurrentPrice);
+			Calendar cal = Calendar.getInstance();
+			java.sql.Timestamp datetime = new java.sql.Timestamp(cal.getTimeInMillis());
+			stmt.setTimestamp(6, datetime);
+			stmt.setString(7, Notes);
+
+			//Call query and store in memory as rs
+			stmt.executeUpdate();
+			conn.commit();
+
+			JOptionPane.showMessageDialog(null, "Reservation on flight " + f.FlightNumber + " for " + p.Name + " in seat " + Seat + " eating " + Meal + " and with notes: " + Notes);
+
+		}catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "lolol didn't work");
+		}
 	}
 }
