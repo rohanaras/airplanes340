@@ -10,6 +10,7 @@ public class DatabaseAccess {
 	private static Map<String, Airport> airports;
 	private static Map<Integer, Passenger> passengers;
 
+	
 	private static void createDatabaseAccess() {
 		conn = getNewConnection();
 	}
