@@ -360,7 +360,6 @@ public class DatabaseAccess {
 				dbconn.rollback();
 			}
 		}finally {
-
 			if (stmt != null) {
 				stmt.close();
 			}
