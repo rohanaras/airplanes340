@@ -269,22 +269,6 @@ public class DatabaseAccess {
 			e.printStackTrace();
 		}
 		return null;
-
-//		r.Flight = new Flight();
-//		r.Flight.ArrivalAirport = new Airport(0, "Seattle");
-//		r.Flight.DepartureAirport = new Airport(0, "Las Vegas");
-//		r.Flight.ArrivalTime = new Date();
-//		r.Flight.DepartureTime = new Date();
-//		r.Flight.BasePrice = 150;
-//		r.Flight.CurrentPrice = 300;
-//		r.Flight.FlightNumber = "154";
-//		r.MealOptions = "Steak";
-//		r.Seat = "14B";
-//		r.Passenger = new Passenger();
-//		r.Passenger.Name = "Kevin";
-//		r.NotesAboutReservation = "Has a baby.";
-//		r.PricePaid = 180;
-//		return new Reservation [] { r };
 	}
 
 	//DO NOT DO
