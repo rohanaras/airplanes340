@@ -105,9 +105,8 @@ public class CustomersWindow extends JFrame{
 			Reservation [] reservations = DatabaseAccess.GetCustomerReservations(p);
 			if (reservations != null)
 			{
-				for (int i=0;i<reservations.length;i++)
+				for (Reservation r : reservations)
 				{
-					Reservation r = reservations[i];
 					jTable1Model.addRow(
 								new Object[] { 
 									r.Flight.FlightNumber,
