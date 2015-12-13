@@ -188,7 +188,7 @@ public class DatabaseAccess {
 			/** Getting the reservation information **/
 
 			query = "SELECT mealType, seatNumber, reservationNotes, reservationPrice, firstName, lastName, " +
-					"Passenger.passengerID FROM Reservation JOIN Passenger ON Reservation.PassengerID=Passenger.passengerID " +
+					"Passenger.passengerID FROM Reservation JOIN Passenger ON Reservation.PassengerID=passengerID " +
 					"WHERE flightID=" + FlightID;
 
 			stmt = conn.createStatement();
@@ -355,12 +355,16 @@ public class DatabaseAccess {
 		try{
 			//Set database here
 			conn.setCatalog("AirlineReservation");
-			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-			conn.setAutoCommit(false);
 
-			String numSeats = "SELECT a.numberOfSeats FROM aircraft a" +
-					"	JOIN flight f ON f.aircraftID = a.aircraftID" +
-					"	WHERE f.ID = " + f.FlightID;
+			String seatsTaken = "SELECT COUNT(*) FROM reservation r" +
+					"WHERE r.flightID = " + f.FlightID +
+					"GROUP BY r.flightID";
+			int numSeats = Integer.parseInt(seatsTaken);
+
+			if (numSeats == f.Capacity - 1) {
+				conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+				conn.setAutoCommit(false);
+			}
 
 			//Set the SQL query here
 			String query = "INSERT INTO reservation VALUES (?,?,?,?,?,?,?);";
@@ -377,8 +381,8 @@ public class DatabaseAccess {
 			stmt.setString(7, Notes);
 
 			//Call query and store in memory as rs
-			//Statement stmt = conn.createStatement();
 			stmt.executeUpdate();
+			conn.commit();
 
 			JOptionPane.showMessageDialog(null, "Reservation on flight " + f.FlightNumber + " for " + p.Name + " in seat " + Seat + " eating " + Meal + " and with notes: " + Notes);
 
