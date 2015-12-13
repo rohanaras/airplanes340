@@ -3,6 +3,7 @@ import java.util.Vector;
 import java.sql.* ;  // for standard JDBC programs
 import java.util.*;
 import javax.swing.JOptionPane;
+import javax.swing.plaf.nimbus.State;
 
 
 public class DatabaseAccess {
@@ -193,7 +194,7 @@ public class DatabaseAccess {
 			/** Getting the reservation information **/
 
 			query = "SELECT mealType, seatNumber, reservationNotes, reservationPrice, firstName, lastName, " +
-					"Passenger.passengerID FROM Reservation JOIN Passenger ON Reservation.PassengerID=passengerID " +
+					"Passenger.passengerID FROM Reservation JOIN Passenger ON Reservation.PassengerID=Passenger.passengerID " +
 					"WHERE flightID=" + FlightID;
 			rs = stmt.executeQuery(query);
 
@@ -308,25 +309,21 @@ public class DatabaseAccess {
 		return new Reservation [] { r };
 	}
 	                    
-	public static void MakeReservation(Flight f, Passenger p, String Seat, String Meal, String Notes)
-	{
+	public static void MakeReservation(Flight f, Passenger p, String Seat, String Meal, String Notes) throws SQLException {
 		createDatabaseAccess();
 
 		try{
-			String seatsTaken = "SELECT COUNT(*) FROM reservation r" +
-					"WHERE r.flightID = " + f.FlightID +
-					"GROUP BY r.flightID";
-			int numSeats = Integer.parseInt(seatsTaken);
+			/* begin transaction
+			insert stuff
+			if time is expired, rollback
+			else commit
+			 */
 
-			if (numSeats == f.Capacity - 1) {
-				conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-				conn.setAutoCommit(false);
-			}
+			conn.setAutoCommit(false);
 
 			//Set the SQL query here
 			String query = "INSERT INTO reservation VALUES (?,?,?,?,?,?,?);";
 			PreparedStatement stmt = conn.prepareStatement(query);
-
 			stmt.setInt(1, p.PassengerID);
 			stmt.setInt(2, f.FlightID);
 			stmt.setString(3, Seat);
@@ -337,16 +334,28 @@ public class DatabaseAccess {
 			stmt.setTimestamp(6, datetime);
 			stmt.setString(7, Notes);
 
-			//Call query and store in memory as rs
+
+			//Call query and execute
 			stmt.executeUpdate();
-			conn.commit();
+			String q = "SELECT * FROM reservation WHERE reservation.flightID = " + f.FlightID;
+			Statement s = conn.prepareStatement(q);
+			ResultSet rs = s.executeQuery(q);
+			int count = 0;
+			while(rs.next()){
+				count++;
+			}
+
+			if (count <= f.Capacity) {
+				conn.commit();
+			}
 
 			JOptionPane.showMessageDialog(null, "Reservation on flight " + f.FlightNumber + " for " + p.Name +
 					" in seat " + Seat + " eating " + Meal + " and with notes: " + Notes);
 
-		}catch (Exception e) {
+		}catch (SQLException e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "lolol didn't work");
+			conn.rollback();
 		}
 	}
 }

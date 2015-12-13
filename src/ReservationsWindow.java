@@ -1,6 +1,7 @@
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -96,7 +97,11 @@ public class ReservationsWindow extends JFrame {
 					jButton1.setText("Make Reservation");
 					jButton1.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent evt) {
-							jButton1ActionPerformed(evt);
+							try {
+								jButton1ActionPerformed(evt);
+							} catch (SQLException e) {
+								e.printStackTrace();
+							}
 						}
 					});
 				}
@@ -124,7 +129,7 @@ public class ReservationsWindow extends JFrame {
 		return jComboBox1;
 	}
 	
-	private void jButton1ActionPerformed(ActionEvent evt) {
+	private void jButton1ActionPerformed(ActionEvent evt) throws SQLException {
 		
 		Passenger p = (Passenger) this.jComboBox1.getSelectedItem();
 		if (p != null)

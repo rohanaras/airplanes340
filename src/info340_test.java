@@ -18,8 +18,7 @@ public class info340_test {
             String pass = "Info340C";
 
             //Set the SQL query here
-            String query = "SELECT COUNT(r.flightID) FROM reservation r" +
-                    "WHERE r.flightID = 2 GROUP BY r.flightID";
+            String query = "SELECT airport.city FROM airport";
 
             Connection conn = DriverManager.getConnection(url, user, pass);
 
@@ -32,7 +31,7 @@ public class info340_test {
 
             //While results has next, print name
             while(rs.next()){
-                System.out.print(rs.getString("reservation.flightID"));
+                System.out.print(rs.getString("city"));
                 System.out.println();
             }
 
