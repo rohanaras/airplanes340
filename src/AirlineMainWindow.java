@@ -227,7 +227,6 @@ public class AirlineMainWindow {
 								  (Airport)jComboBox2.getSelectedItem(), 
 								  deptDate);
 
-
 		df = java.text.DateFormat.getTimeInstance();
 		for (int i=0;i<flights.length;i++)
 		{

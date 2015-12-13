@@ -10,7 +10,7 @@ public class DatabaseAccess {
 	private static Map<String, Airport> airports;
 	private static Map<Integer, Passenger> passengers;
 
-	public static void createDatabaseAccess() {
+	public static Connection createDatabaseAccess() {
 		try{
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
@@ -19,9 +19,10 @@ public class DatabaseAccess {
 			String user = "perry";
 			String pass = "Info340C";
 
-			conn = DriverManager.getConnection(url, user, pass);
+			return conn = DriverManager.getConnection(url, user, pass);
 		}catch (Exception e) {
 			e.printStackTrace();
+			return null;
 		}
 	}
 	
@@ -62,21 +63,24 @@ public class DatabaseAccess {
 	}
 
 	//Returns the most recent seat price for a given flightID
-	public static float getCurrentPrice(int flight) {
-		createDatabaseAccess();
+	public static float getCurrentPrice(int flight) {createDatabaseAccess();
 		try{
 			//Set the SQL query here
 			//Selects the price for the most recent reservation given a flight number
-			String query = "SELECT TOP 1 reservationPrice FROM Reservation WHERE flightID = " + flight + " ORDER BY reservationDate DESC";
+			String query = "SELECT TOP 1 reservationPrice FROM Reservation WHERE flightID = ? ORDER BY reservationDate DESC";
 
 			//Set database here
 			conn.setCatalog("AirlineReservation");
 
-			//Call query and store in memory as rs
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+			//Prepare the statement
+			PreparedStatement preparedStatement = conn.prepareStatement(query);
+			preparedStatement.setInt(1, flight);
 
-			//While results has next, print name
+			//Call the query and store as rs
+			ResultSet rs = preparedStatement.executeQuery();
+
+
+			//While results has next show reservationPrice
 			while(rs.next()){
 				return(rs.getFloat("reservationPrice"));
 			}
@@ -89,21 +93,31 @@ public class DatabaseAccess {
 
 	public static Flight[] GetFlights(Airport DepartAirport, Airport ArriveAirport, Date DepartureDate )
 	{
+		System.out.println(DepartureDate);
 		Vector<Flight> vFlights = new Vector<Flight>();
 		try{
 			//Set the SQL query here
 			//Returns flights joined with aircraft for capacity
 
-			String query = "SELECT * FROM Flight JOIN Aircraft ON Flight.aircraftID = Aircraft.aircraftID WHERE originCode = (SELECT airportCode FROM Airport WHERE city = '" + DepartAirport.toString() + "') AND destinationCode = (SELECT airportCode FROM airport WHERE city = '" + ArriveAirport.toString() + "')";
+			String query = "SELECT * FROM Flight JOIN Aircraft ON Flight.aircraftID = Aircraft.aircraftID WHERE originCode = (SELECT airportCode FROM Airport WHERE city = ?) AND destinationCode = (SELECT airportCode FROM airport WHERE city = ?) AND scheduledDeptTime BETWEEN ? AND DATEADD(day, 1, ?)";
 
-
+			//Convert dateobjects
+			java.sql.Timestamp sqlDate = new java.sql.Timestamp(DepartureDate.getTime());
+			System.out.print("timestamp: " + sqlDate);
 
 			//Set database here
 			conn.setCatalog("AirlineReservation");
 
-			//Call query and store in memory as rs
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+			//Prepare the statement
+			PreparedStatement preparedStatement = conn.prepareStatement(query);
+			preparedStatement.setString(1, DepartAirport.toString());
+			preparedStatement.setString(2, ArriveAirport.toString());
+			preparedStatement.setTimestamp(3, sqlDate);
+			preparedStatement.setTimestamp(4, sqlDate);
+
+
+			//Call the query and store as rs
+			ResultSet rs = preparedStatement.executeQuery();
 
 			//While results has next, create flight and add it to vFlights
 			while(rs.next()){
@@ -187,7 +201,7 @@ public class DatabaseAccess {
 
 			/** Getting the reservation information **/
 
-			query = "SELECT mealType, seatNumber, reservationNotes, reservationPrice, firstName, lastName, " +
+			query = "SELECT mealType, seatNumber, reservationNotes, reservationPrice, firstName  " +
 					"Passenger.passengerID FROM Reservation JOIN Passenger ON Reservation.PassengerID=Passenger.passengerID " +
 					"WHERE flightID=" + FlightID;
 
@@ -203,7 +217,7 @@ public class DatabaseAccess {
 				r.MealOptions = rs.getString("mealType");
 				r.Seat = rs.getString("seatNumber");
 				r.Passenger = passengers.get(rs.getInt("passengerID"));
-				r.Passenger.Name = rs.getString("firstName") + " " + rs.getString("lastName");
+				r.Passenger.Name = rs.getString("firstName");// + " " + rs.getString("lastName");
 				r.NotesAboutReservation = rs.getString("reservationNotes");
 				r.PricePaid = rs.getFloat("reservationPrice");
 				reservations.add(r);
@@ -241,7 +255,7 @@ public class DatabaseAccess {
 			//While results has next, create new passenger
 			while(rs.next()){
 				passengers.put(rs.getInt("passengerID"), new Passenger(rs.getInt("passengerID"),
-						rs.getString("firstName") + ' ' + rs.getString("lastName")));
+						rs.getString("firstName")));// + ' ' + rs.getString("lastName")));
 			}
 
 			Passenger[] p = new Passenger[passengers.size()];
@@ -267,14 +281,22 @@ public class DatabaseAccess {
 			String query = "SELECT Flight.flightID, destinationCode, originCode, scheduledArrTime," +
 					"scheduledDeptTime, basePrice, flightNumber, mealType, seatNumber, firstName," +
 					"Reservation.passengerID, reservationNotes, reservationPrice FROM Reservation JOIN Flight ON Flight.flightID = Reservation.flightID JOIN Passenger ON Reservation.passengerID = Passenger.passengerID" +
-					" WHERE Reservation.passengerID = '" + p.PassengerID + "'";
+					" WHERE Reservation.passengerID = ?";
 
 			//Set database here
 			conn.setCatalog("AirlineReservation");
 
+
+			//Prepare the statement
+			PreparedStatement preparedStatement = conn.prepareStatement(query);
+			preparedStatement.setInt(1, p.PassengerID);
+
+			//Call the query and store as rs
+			ResultSet rs = preparedStatement.executeQuery();
+
 			//Call query and store in memory as rs
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+//			Statement stmt = conn.createStatement();
+//			ResultSet rs = stmt.executeQuery(query);
 
 			//While results has next, create new passenger
 			ArrayList<Reservation> al = new ArrayList<Reservation>();
