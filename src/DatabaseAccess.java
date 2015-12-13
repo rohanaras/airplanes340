@@ -192,10 +192,11 @@ public class DatabaseAccess {
 		try{
 			//Set the SQL query here
 			//Selects the price for the most recent reservation given a flight number
-			String query = "SELECT * FROM Flight WHERE flightID=" + FlightID;
+			String query = "SELECT * FROM Flight WHERE flightID=?";
 
 			//Call query and store in memory as rs
-			Statement stmt = conn.createStatement();
+			PreparedStatement stmt = conn.prepareStatement(query);
+			stmt.setInt(1, FlightID);
 			ResultSet rs = stmt.executeQuery(query);
 
 			//While results has next, print name
@@ -354,9 +355,10 @@ public class DatabaseAccess {
 
 			//Call query and execute
 			stmt.executeUpdate();
-			String q = "SELECT * FROM reservation WHERE reservation.flightID = " + f.FlightID;
-			Statement s = dbconn.createStatement();
-			ResultSet rs = s.executeQuery(q);
+			String q = "SELECT * FROM reservation WHERE reservation.flightID = ?";
+			PreparedStatement s = dbconn.prepareStatement(q);
+			s.setInt(1, f.FlightID);
+			ResultSet rs = s.executeQuery();
 			int count = 0;
 			while(rs.next()){
 				count++;
