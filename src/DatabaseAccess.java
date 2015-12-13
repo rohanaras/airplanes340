@@ -384,7 +384,8 @@ public class DatabaseAccess {
 			stmt.executeUpdate();
 			conn.commit();
 
-			JOptionPane.showMessageDialog(null, "Reservation on flight " + f.FlightNumber + " for " + p.Name + " in seat " + Seat + " eating " + Meal + " and with notes: " + Notes);
+			JOptionPane.showMessageDialog(null, "Reservation on flight " + f.FlightNumber + " for " + p.Name +
+					" in seat " + Seat + " eating " + Meal + " and with notes: " + Notes);
 
 		}catch (Exception e) {
 			e.printStackTrace();
