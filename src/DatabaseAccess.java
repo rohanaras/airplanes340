@@ -56,7 +56,6 @@ public class DatabaseAccess {
 			e.printStackTrace();
 		}
 		return null;
-		// TODO:  Query the database and retrive the information.
 		// resultset.findcolumn(string col)
 		//return new Airport[] { new Airport(1,"Seattle"), new Airport(2,"Portland") };
 	}
@@ -310,7 +309,8 @@ public class DatabaseAccess {
 	}
 	                    
 	public static void MakeReservation(Flight f, Passenger p, String Seat, String Meal, String Notes) throws SQLException {
-		createDatabaseAccess();
+		Connection dbconn = null;
+		PreparedStatement stmt = null;
 
 		try{
 			/* begin transaction
@@ -318,12 +318,27 @@ public class DatabaseAccess {
 			if time is expired, rollback
 			else commit
 			 */
+			try{
+				Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
-			conn.setAutoCommit(false);
+				//Set login info here
+				String url = "jdbc:sqlserver://is-fleming.ischool.uw.edu";
+				String user = "perry";
+				String pass = "Info340C";
+
+				dbconn = DriverManager.getConnection(url, user, pass);
+
+				//Set database here
+				dbconn.setCatalog("AirlineReservation");
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			dbconn.setAutoCommit(false);
 
 			//Set the SQL query here
 			String query = "INSERT INTO reservation VALUES (?,?,?,?,?,?,?);";
-			PreparedStatement stmt = conn.prepareStatement(query);
+			stmt = dbconn.prepareStatement(query);
 			stmt.setInt(1, p.PassengerID);
 			stmt.setInt(2, f.FlightID);
 			stmt.setString(3, Seat);
@@ -338,7 +353,7 @@ public class DatabaseAccess {
 			//Call query and execute
 			stmt.executeUpdate();
 			String q = "SELECT * FROM reservation WHERE reservation.flightID = " + f.FlightID;
-			Statement s = conn.prepareStatement(q);
+			Statement s = dbconn.createStatement();
 			ResultSet rs = s.executeQuery(q);
 			int count = 0;
 			while(rs.next()){
@@ -346,16 +361,30 @@ public class DatabaseAccess {
 			}
 
 			if (count <= f.Capacity) {
-				conn.commit();
+				dbconn.commit();
+
+				JOptionPane.showMessageDialog(null, "Reservation on flight " + f.FlightNumber + " for " + p.Name +
+						" in seat " + Seat + " eating " + Meal + " and with notes: " + Notes);
+			} else {
+				JOptionPane.showMessageDialog(null, "Error: max capacity reached");
 			}
 
-			JOptionPane.showMessageDialog(null, "Reservation on flight " + f.FlightNumber + " for " + p.Name +
-					" in seat " + Seat + " eating " + Meal + " and with notes: " + Notes);
 
-		}catch (SQLException e) {
+		}catch (Exception e) {
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, "lolol didn't work");
-			conn.rollback();
+			if (dbconn != null) {
+				dbconn.rollback();
+			}
+		}finally {
+
+			if (stmt != null) {
+				stmt.close();
+			}
+
+			if (dbconn != null) {
+				dbconn.close();
+			}
+
 		}
 	}
 }
