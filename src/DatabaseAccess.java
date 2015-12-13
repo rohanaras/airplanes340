@@ -3,7 +3,6 @@ import java.util.Vector;
 import java.sql.* ;  // for standard JDBC programs
 import java.util.*;
 import javax.swing.JOptionPane;
-import javax.swing.plaf.nimbus.State;
 
 
 public class DatabaseAccess {
@@ -11,7 +10,12 @@ public class DatabaseAccess {
 	private static Map<String, Airport> airports;
 	private static Map<Integer, Passenger> passengers;
 
-	public static void createDatabaseAccess() {
+	private static void createDatabaseAccess() {
+		conn = getNewConnection();
+	}
+
+	private static Connection getNewConnection() {
+		Connection connection = null;
 		try{
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
@@ -20,13 +24,14 @@ public class DatabaseAccess {
 			String user = "perry";
 			String pass = "Info340C";
 
-			conn = DriverManager.getConnection(url, user, pass);
+			connection = DriverManager.getConnection(url, user, pass);
 
 			//Set database here
-			conn.setCatalog("AirlineReservation");
+			connection.setCatalog("AirlineReservation");
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
+		return connection;
 	}
 	
 	public static Airport[] GetAirportCities() {
@@ -75,10 +80,17 @@ public class DatabaseAccess {
 			while(rs.next())
 				return (rs.getFloat("reservationPrice"));
 
+			//Keep base price if there are no passengers
+			query = "SELECT basePrice FROM Flight WHERE flightID=?";
+			PreparedStatement newStmt = conn.prepareStatement(query);
+			newStmt.setInt(1, flight);
+			rs = newStmt.executeQuery();
+			while(rs.next())
+				return (rs.getFloat("basePrice"));
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		return 0;
+		return -1;
 	}
 
 	public static Date getProperDateTime(Timestamp timestamp) {
@@ -293,7 +305,7 @@ public class DatabaseAccess {
 	}
 	                    
 	public static void MakeReservation(Flight f, Passenger p, String Seat, String Meal, String Notes) throws SQLException {
-		Connection dbconn = null;
+		Connection dbconn = getNewConnection();
 		PreparedStatement stmt = null;
 
 		try{
@@ -302,21 +314,6 @@ public class DatabaseAccess {
 			if time is expired, rollback
 			else commit
 			 */
-			try{
-				Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-
-				//Set login info here
-				String url = "jdbc:sqlserver://is-fleming.ischool.uw.edu";
-				String user = "perry";
-				String pass = "Info340C";
-
-				dbconn = DriverManager.getConnection(url, user, pass);
-
-				//Set database here
-				dbconn.setCatalog("AirlineReservation");
-			}catch (Exception e) {
-				e.printStackTrace();
-			}
 
 			dbconn.setAutoCommit(false);
 
