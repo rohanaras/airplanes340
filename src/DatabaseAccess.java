@@ -193,7 +193,7 @@ public class DatabaseAccess {
 			/** Getting the reservation information **/
 
 			query = "SELECT mealType, seatNumber, reservationNotes, reservationPrice, firstName, lastName, " +
-					"Passenger.passengerID FROM Reservation JOIN Passenger ON Reservation.PassengerID=passengerID " +
+					"Passenger.passengerID FROM Reservation JOIN Passenger ON Reservation.PassengerID=Passenger.passengerID " +
 					"WHERE flightID=" + FlightID;
 			rs = stmt.executeQuery(query);
 
