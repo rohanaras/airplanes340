@@ -33,7 +33,7 @@ public class DatabaseAccess {
 		}
 		return connection;
 	}
-	
+
 	public static Airport[] GetAirportCities() {
 		createDatabaseAccess();
 		airports = new TreeMap<>();
@@ -61,8 +61,6 @@ public class DatabaseAccess {
 			e.printStackTrace();
 		}
 		return null;
-		// resultset.findcolumn(string col)
-		//return new Airport[] { new Airport(1,"Seattle"), new Airport(2,"Portland") };
 	}
 
 	//Returns the most recent seat price for a given flightID
@@ -71,10 +69,15 @@ public class DatabaseAccess {
 		try{
 			//Set the SQL query here
 			//Selects the price for the most recent reservation given a flight number
-			String query = "SELECT TOP 1 reservationPrice FROM Reservation WHERE flightID = " + flight + " ORDER BY reservationDate DESC";
-			//Call query and store in memory as rs
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+			String query = "SELECT TOP 1 reservationPrice FROM Reservation" +
+					" WHERE flightID = ? ORDER BY reservationDate DESC";
+
+			//Prepare the statement
+			PreparedStatement preparedStatement = conn.prepareStatement(query);
+			preparedStatement.setInt(1, flight);
+
+			//Call the query and store as rs
+			ResultSet rs = preparedStatement.executeQuery();
 
 			//While results has next, print name
 			while(rs.next())
@@ -94,7 +97,7 @@ public class DatabaseAccess {
 	}
 
 	public static Date getProperDateTime(Timestamp timestamp) {
-		return new java.util.Date(timestamp.getTime());
+		return new Date(timestamp.getTime());
 	}
 
 	public static Passenger [] GetCustomers () {
@@ -135,11 +138,24 @@ public class DatabaseAccess {
 			//Set the SQL query here
 			//Returns flights joined with aircraft for capacity
 
-			String query = "SELECT * FROM Flight JOIN Aircraft ON Flight.aircraftID = Aircraft.aircraftID WHERE originCode = (SELECT airportCode FROM Airport WHERE city = '" + DepartAirport.toString() + "') AND destinationCode = (SELECT airportCode FROM airport WHERE city = '" + ArriveAirport.toString() + "')";
+			String query = "SELECT * FROM Flight JOIN Aircraft ON Flight.aircraftID = Aircraft.aircraftID " +
+					"WHERE originCode = (SELECT airportCode FROM Airport WHERE city = ?) AND destinationCode = " +
+					"(SELECT airportCode FROM airport WHERE city = ?) AND scheduledDeptTime BETWEEN ? AND " +
+					"DATEADD(day, 1, ?)";
 
-			//Call query and store in memory as rs
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+			//Convert dateobjects
+			Timestamp sqlDate = new Timestamp(DepartureDate.getTime());
+			System.out.print("timestamp: " + sqlDate);
+
+			//Prepare the statement
+			PreparedStatement preparedStatement = conn.prepareStatement(query);
+			preparedStatement.setString(1, DepartAirport.toString());
+			preparedStatement.setString(2, ArriveAirport.toString());
+			preparedStatement.setTimestamp(3, sqlDate);
+			preparedStatement.setTimestamp(4, sqlDate);
+
+			//Call the query and store as rs
+			ResultSet rs = preparedStatement.executeQuery();
 
 			//While results has next, create flight and add it to vFlights
 			while(rs.next()){
@@ -242,12 +258,16 @@ public class DatabaseAccess {
 			//Returns passenger ID, fName, and lName
 			String query = "SELECT Flight.flightID, destinationCode, originCode, scheduledArrTime," +
 					"scheduledDeptTime, basePrice, flightNumber, mealType, seatNumber, firstName," +
-					"Reservation.passengerID, reservationNotes, reservationPrice FROM Reservation JOIN Flight ON Flight.flightID = Reservation.flightID JOIN Passenger ON Reservation.passengerID = Passenger.passengerID" +
-					" WHERE Reservation.passengerID = '" + p.PassengerID + "'";
+					"Reservation.passengerID, reservationNotes, reservationPrice FROM Reservation JOIN Flight " +
+					"ON Flight.flightID = Reservation.flightID JOIN Passenger ON Reservation.passengerID = " +
+					"Passenger.passengerID WHERE Reservation.passengerID = ?";
 
-			//Call query and store in memory as rs
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
+			//Prepare the statement
+			PreparedStatement preparedStatement = conn.prepareStatement(query);
+			preparedStatement.setInt(1, p.PassengerID);
+
+			//Call the query and store as rs
+			ResultSet rs = preparedStatement.executeQuery();
 
 			//While results has next, create new passenger
 			ArrayList<Reservation> al = new ArrayList<Reservation>();
@@ -326,7 +346,7 @@ public class DatabaseAccess {
 			stmt.setString(4, Meal);
 			stmt.setFloat(5, f.CurrentPrice);
 			Calendar cal = Calendar.getInstance();
-			java.sql.Timestamp datetime = new java.sql.Timestamp(cal.getTimeInMillis());
+			Timestamp datetime = new Timestamp(cal.getTimeInMillis());
 			stmt.setTimestamp(6, datetime);
 			stmt.setString(7, Notes);
 
